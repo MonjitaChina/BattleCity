@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Battle City - Clon Web</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            background-color: #111; color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            display: flex; flex-direction: column; align-items: center;
+            margin: 0; padding-top: 20px;
+        }
+        h1 { color: #f39c12; text-shadow: 2px 2px #c0392b; }
+
+        #login-screen {
+            background: #222; padding: 40px; border: 4px solid #f39c12; border-radius: 8px;
+            text-align: center; margin-top: 50px; box-shadow: 0px 0px 20px rgba(243, 156, 18, 0.5);
+            width: 350px;
+        }
+        input, select {
+            padding: 15px; font-size: 14px; font-family: 'Press Start 2P', cursive;
+            margin-bottom: 15px; width: 100%; text-align: center;
+            background: #000; color: #fff; border: 2px solid #555; box-sizing: border-box;
+        }
+        select { cursor: pointer; }
+
+        button {
+            padding: 15px 30px; font-size: 16px; font-family: 'Press Start 2P', cursive;
+            background: #e74c3c; color: white; border: none; cursor: pointer;
+            box-shadow: 0px 4px 0px #c0392b; margin-top: 10px; width: 100%;
+        }
+        button:active { transform: translateY(4px); box-shadow: none; }
+        button:disabled { background: #7f8c8d; box-shadow: none; cursor: not-allowed; }
+
+        #modo-desc {
+            color: #bdc3c7; font-size: 9px; line-height: 1.7; min-height: 48px;
+            margin: -5px 0 15px 0;
+        }
+        #controles-hint { color: #7f8c8d; font-size: 8px; line-height: 1.8; margin-top: 20px; }
+        #login-error { color: #e74c3c; font-size: 10px; margin-bottom: 15px; min-height: 15px; line-height: 1.5; }
+
+        #main-wrapper { display: none; gap: 20px; align-items: flex-start; margin-top: 20px; }
+        canvas { background-color: #000; border: 6px solid #7f8c8d; }
+
+        .side-panel {
+            background: #333; border: 4px solid #555; padding: 20px; width: 220px;
+            display: flex; flex-direction: column; gap: 16px; box-sizing: border-box;
+        }
+        .stat-label { color: #bdc3c7; font-size: 10px; margin-bottom: 10px; line-height: 1.4; }
+        .stat-value { color: #f1c40f; font-size: 16px; }
+
+        #ranking-list { list-style: none; padding: 0; margin: 0; font-size: 10px; line-height: 2; color: #ecf0f1; }
+        #ranking-list li { display: flex; justify-content: space-between; border-bottom: 1px dashed #555; padding: 5px 0; }
+        .rank-name { color: #3498db; }
+        .rank-score { color: #2ecc71; }
+
+        #overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); flex-direction: column; justify-content: center; align-items: center;
+            z-index: 999; text-align: center;
+        }
+        #final-detail { color: #3498db; font-size: 12px; margin-bottom: 30px; line-height: 1.6; }
+        #save-status { font-size: 14px; margin-bottom: 40px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h1>BATTLE CITY</h1>
+        <p style="font-size: 12px; line-height: 1.5; margin-bottom: 25px;">Configura tu partida</p>
+        <input type="text" id="username" placeholder="TU NOMBRE">
+        <select id="modo" onchange="actualizarDescripcionModo()">
+            <option value="campana" selected>MODO: CAMPAÑA</option>
+            <option value="oleadas">MODO: OLEADAS</option>
+        </select>
+        <div id="modo-desc"></div>
+        <select id="dificultad">
+            <option value="bajo">DIFICULTAD: BAJA</option>
+            <option value="medio" selected>DIFICULTAD: MEDIA</option>
+            <option value="alta">DIFICULTAD: ALTA</option>
+        </select>
+        <div id="login-error"></div>
+        <button onclick="iniciarSesion()">START</button>
+        <div id="controles-hint">WASD / FLECHAS: MOVER<br>ESPACIO: DISPARAR</div>
+    </div>
+
+    <div id="main-wrapper">
+        <canvas id="gameCanvas" width="520" height="520"></canvas>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="side-panel">
+                <div><div class="stat-label">JUGADOR</div><div class="stat-value" id="playerName">-</div></div>
+                <div><div class="stat-label">MODO</div><div class="stat-value" id="modeLabel" style="color: #3498db; font-size: 12px;">-</div></div>
+                <div><div class="stat-label">VIDAS</div><div class="stat-value" id="livesValue" style="color: #2ecc71;">3</div></div>
+                <div><div class="stat-label">DIFICULTAD</div><div class="stat-value" id="diffLabel" style="color: #e74c3c;">-</div></div>
+                <div><div class="stat-label">PUNTOS</div><div class="stat-value" id="score">0</div></div>
+                <div><div class="stat-label" id="levelLabel">NIVEL</div><div class="stat-value" id="levelValue">1</div></div>
+                <div><div class="stat-label">ESCENARIO</div><div class="stat-value" id="sceneValue" style="font-size: 11px; line-height: 1.4;">-</div></div>
+                <div><div class="stat-label">ENEMIGOS</div><div class="stat-value" id="enemiesValue">0 / 0</div></div>
+            </div>
+
+            <div class="side-panel">
+                <div class="stat-label" id="ranking-title" style="text-align: center; color: #f1c40f; font-size: 12px;">TOP JUGADORES</div>
+                <ul id="ranking-list">
+                    <li>Cargando...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE FIN DE PARTIDA (GAME OVER / VICTORIA) -->
+    <div id="overlay">
+        <h1 id="overlay-title" style="color: #e74c3c; font-size: 50px; margin-bottom: 20px;">GAME OVER</h1>
+        <p style="color: #fff; margin-bottom: 15px; font-size: 20px;">Tu Puntuación: <span id="final-score" style="color:#f1c40f;">0</span></p>
+        <p id="final-detail"></p>
+
+        <p id="save-status">Haz clic abajo para guardar tu récord.</p>
+
+        <button id="btn-reiniciar" onclick="guardarYReiniciar()" style="width: auto; margin-top: 20px;">GUARDAR Y REINICIAR</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
