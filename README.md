@@ -46,8 +46,6 @@ Hay que lanzarlo desde la carpeta backend, porque battle_city.db se crea y se le
 
 Luego Abrir Index.HTML con un servidor local (live server en visual studio)
 
-Después abre http://127.0.0.1:5500. También puedes abrir index.html directamente con doble clic, porque el CORS está abierto.
-
 3. Jugar: escribe tu nombre, elige modo y dificultad y pulsa START. Se mueve con WASD o las flechas y se dispara con ESPACIO.
 
 El puerto del backend está fijo en game.js (const API_URL = "http://127.0.0.1:8000"). Si lo cambias, edita esa línea.
