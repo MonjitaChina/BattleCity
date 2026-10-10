@@ -39,19 +39,12 @@ Requisitos: Python 3.12 o superior y un navegador moderno. Para la fuente de Goo
 1. Backend
 
 bash
-cd "battle city v3/battle city/backend"
-python -m venv venv
-venv\Scripts\activate          # Windows  (Linux/macOS: source venv/bin/activate)
-pip install fastapi uvicorn pydantic
+cd "battle city\backend"
 uvicorn main:app --host 127.0.0.1 --port 8000
 
 Hay que lanzarlo desde la carpeta backend, porque battle_city.db se crea y se lee con ruta relativa. La API queda en http://127.0.0.1:8000, con documentación automática en /docs.
 
-2. Frontend (en otra terminal)
-
-bash
-cd "battle city v3/battle city/frontend"
-python -m http.server 5500
+Luego Abrir Index.HTML con un servidor local (live server en visual studio)
 
 Después abre http://127.0.0.1:5500. También puedes abrir index.html directamente con doble clic, porque el CORS está abierto.
 
